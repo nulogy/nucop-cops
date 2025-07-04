@@ -22,17 +22,13 @@ module Nucop
 
       def default_configuration
         {
-          enforced_cops_file: ".rubocop.enforced.yml",
           rubocop_todo_file: ".rubocop_todo.yml",
-          rubocop_todo_config_file: ".rubocop.backlog.yml",
           diffignore_file: ".nucop_diffignore"
         }
       end
     end
 
     class_option :diffignore_file, default: load_custom_options[:diffignore_file]
-    class_option :enforced_cops_file, default: load_custom_options[:enforced_cops_file]
-    class_option :rubocop_todo_config_file, default: load_custom_options[:rubocop_todo_config_file]
     class_option :rubocop_todo_file, default: load_custom_options[:rubocop_todo_file]
 
     desc "diff_enforced", "run RuboCop on the current diff using only the enforced cops"
@@ -44,7 +40,7 @@ module Nucop
     method_option "json", type: :string, default: nil, desc: "Output results as JSON format to the provided file"
 
     def diff_enforced
-      invoke :diff, nil, options.merge(only: cops_to_enforce.join(","))
+      invoke :diff, nil, options
     end
 
     desc "diff_enforced_github", "run RuboCop on the current diff using only the enforced cops (using GitHub to find the files changed)"
@@ -57,7 +53,7 @@ module Nucop
     method_option "json", type: :string, default: nil, desc: "Output results as JSON format to the provided file"
 
     def diff_enforced_github
-      invoke :diff_github, nil, options.merge(only: cops_to_enforce.join(","))
+      invoke :diff_github, nil, options
     end
 
     desc "diff", "run RuboCop on the current diff"
@@ -186,11 +182,10 @@ module Nucop
     method_option "auto-correct", type: :boolean, default: false, desc: "runs RuboCop with auto-correct option (deprecated)"
     method_option "autocorrect", type: :boolean, default: false, desc: "runs RuboCop with autocorrect option"
     method_option "autocorrect-all", type: :boolean, default: false, desc: "runs RuboCop with autocorrect-all option"
-    method_option "exclude-backlog", type: :boolean, default: false, desc: "when true, uses config which excludes violations in the RuboCop backlog"
 
     def rubocop(files = nil)
-      print_cops_being_run(options[:only])
-      config_file = options[:"exclude-backlog"] ? RUBOCOP_DEFAULT_CONFIG_FILE : options[:rubocop_todo_config_file]
+      puts "Running all cops..."
+      config_file = RUBOCOP_DEFAULT_CONFIG_FILE
 
       formatters = []
       formatters << "--format Nucop::Formatters::JUnitFormatter --out #{options[:junit_report]}" if options[:junit_report]
@@ -220,13 +215,11 @@ module Nucop
 
     def regen_backlog
       regenerate_rubocop_todos
-      update_enforced_cops
     end
 
     desc "update_enforced", "update the enforced cops list with file with cops that no longer have violations"
-
     def update_enforced
-      update_enforced_cops
+      puts "This is a no-op. Enforced cops are not currently supported."
     end
 
     desc "modified_lines", "display RuboCop violations for ONLY modified lines"
@@ -242,7 +235,7 @@ module Nucop
         "--parallel",
         "--no-server",
         "--format Nucop::Formatters::GitDiffFormatter",
-        "--config #{options[:rubocop_todo_config_file]}",
+        "--config #{RUBOCOP_DEFAULT_CONFIG_FILE}",
         multi_line_to_single_line(diff_files).to_s
       ].join(" ")
 
@@ -254,40 +247,10 @@ module Nucop
     method_option "n", type: :numeric, default: 1, desc: "number of cops to display"
 
     def ready_for_promotion
-      finder = Helpers::NextCopForPromotion.new(options[:rubocop_todo_file])
-      todo_config = YAML.load_file(options[:rubocop_todo_file])
-
-      puts "The following cop(s) are ready to be promoted to enforced. Good luck!"
-      puts "Remember to run `nucop:regen_backlog` to capture your hard work."
-      puts
-      finder.find(options["n"].to_i).each do |todo|
-        puts "#{todo.name} with #{todo.offenses} offenses:"
-        puts
-
-        files = todo_config.fetch(todo.name, {}).fetch("Exclude", [])
-
-        system("bundle exec rubocop --no-server --parallel --config #{options[:rubocop_todo_config_file]} --only #{todo.name} #{files.join(' ')}")
-        puts("*" * 100) if options["n"] > 1
-        puts
-      end
+      puts "This is a no-op. Enforced cops are not currently supported."
     end
 
     private
-
-    # some cops cannot be used with the --only option and will raise an error
-    # this filters them out
-    def cops_to_enforce
-      cops = enforced_cops
-
-      cops.delete("Lint/UnneededCopDisableDirective")
-      cops.delete("Lint/RedundantCopDisableDirective")
-
-      cops
-    end
-
-    def enforced_cops
-      @_enforced_cops ||= YAML.load_file(options[:enforced_cops_file])
-    end
 
     def capture_std_out(command, error_message = nil, stdin_data = nil)
       std_out, std_error, status = Open3.capture3(command, stdin_data: stdin_data)
@@ -303,15 +266,6 @@ module Nucop
       exit 1
     end
 
-    def print_cops_being_run(only_option)
-      if only_option
-        enforced_cops_count = Helpers::CopCounter.count(enabled_cops, only_option.split(","))
-        puts "Running with a force of #{enforced_cops_count} cops. See '#{options[:enforced_cops_file]}' for more details."
-      else
-        puts "Running all cops (specify using the 'only' option)"
-      end
-    end
-
     def multi_line_to_single_line(str)
       str.split(/\n+/).join(" ")
     end
@@ -325,18 +279,12 @@ module Nucop
       "--#{option} #{options[option] if is_flag_option}"
     end
 
-    def files_changed_since(commit_spec)
-      `git diff #{commit_spec} HEAD --name-only`
-        .split("\n")
-        .select { |e| e.end_with?(".rb") }
-    end
-
     def regenerate_rubocop_todos
       puts "Regenerating '#{options[:rubocop_todo_file]}'. Please be patient..."
 
       rubocop_options = [
         "--auto-gen-config",
-        "--config #{options[:rubocop_todo_config_file]}",
+        "--config #{RUBOCOP_DEFAULT_CONFIG_FILE}",
         "--exclude-limit #{options[:"exclude-limit"]}",
         "--no-server"
       ]
@@ -345,47 +293,14 @@ module Nucop
 
       system(rubocop_command)
 
-      # RuboCop wants to inherit from our todos (options[:rubocop_todo_file]) in our backlog configuration file (options[:rubocop_todo_config_file])
-      # However, that means the next time we try to update our backlog, it will NOT include the violations recorded as todo
-      # For now, we ignore any changes in our backlog config
-      system("git checkout #{options[:rubocop_todo_config_file]}")
-    end
-
-    def rubocop_gem_plugins
-      Nucop::Helpers::RubocopGemDependencies.rubocop_plugins.map { |rubocop_gem| "--plugin #{rubocop_gem}" }
+      # RuboCop wants to inherit from our todos (options[:rubocop_todo_file]) in our configuration file.
+      # However, that means the next time we try to update our backlog, it will NOT include the violations
+      # recorded as todo. For now, we ignore any changes in our config.
+      system("git checkout #{RUBOCOP_DEFAULT_CONFIG_FILE}")
     end
 
     def rubocop_gem_requires
       Nucop::Helpers::RubocopGemDependencies.rubocop_gems.map { |rubocop_gem| "--require #{rubocop_gem}" }
-    end
-
-    def update_enforced_cops
-      puts "Updating enforced cops list..."
-
-      current_enforced_cops = Helpers::CopSet.new(enforced_cops)
-      cops_without_violations.each do |cop|
-        current_enforced_cops.add_cop(cop)
-      end
-
-      if current_enforced_cops.cop_added?
-        File.write(options[:enforced_cops_file], current_enforced_cops.to_a.sort.to_yaml)
-        puts "Updated '#{options[:enforced_cops_file]}'!"
-      else
-        puts "No new cops are clear of violations"
-      end
-    end
-
-    def cops_without_violations
-      cops_with_violations = YAML.load_file(options[:rubocop_todo_file]).map(&:first)
-
-      enabled_cops - cops_with_violations
-    end
-
-    def enabled_cops
-      @_enabled_cops ||= YAML
-        .safe_load(`bundle exec rubocop --no-server --parallel --show-cops`, permitted_classes: [Regexp, Symbol])
-        .select { |_, config| config["Enabled"] }
-        .map(&:first)
     end
   end
 end
