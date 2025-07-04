@@ -1,3 +1,3 @@
 module Nucop
-  VERSION = "0.13.3"
+  VERSION = "1.0.0"
 end
