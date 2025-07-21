@@ -289,8 +289,10 @@ module Nucop
         "--no-server"
       ]
 
-      rubocop_command = "DISABLE_SPRING=1 bundle exec rubocop #{rubocop_options.join(' ')} #{rubocop_gem_requires.join(' ')}"
+      system("rm -f #{options[:rubocop_todo_file]}")
+      system("touch #{options[:rubocop_todo_file]}")
 
+      rubocop_command = "DISABLE_SPRING=1 bundle exec rubocop #{rubocop_options.join(' ')} #{rubocop_gem_requires.join(' ')}"
       system(rubocop_command)
 
       # RuboCop wants to inherit from our todos (options[:rubocop_todo_file]) in our configuration file.
