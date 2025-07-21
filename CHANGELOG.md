@@ -1,6 +1,8 @@
 # Change log
 
-## main (unreleased)
+## 1.0.0 (2025-07-04)
+
+* Drop support for .rubocop.enforced.yml
 
 ## 0.13.3 (2025-03-36)
 
