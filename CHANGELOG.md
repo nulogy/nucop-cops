@@ -1,10 +1,9 @@
 # Change log
 
-## 1.0.1 (2025-07-21)
+## 1.0.0 (2026-01-16)
 
-### Fixed
-
-* Clear .rubocop_todo.yml before regenerating it
+* Initial release of nucop-cops gem, extracted from nucop
+* Contains only custom RuboCop cops, no longer includes CLI tooling
 
 ## 1.0.0 (2025-07-04)
 

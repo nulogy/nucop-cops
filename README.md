@@ -1,81 +1,80 @@
-# Nucop
+# Nucop::Cops
 
-This gem contains custom cops and additional tooling for Nulogy's implementation of [RuboCop](https://github.com/rubocop-hq/rubocop).
+This gem contains custom [RuboCop](https://github.com/rubocop-hq/rubocop) cops for Nulogy's Ruby projects.
 
-This functionality is executed by the `bin/nucop` executable. If you installed the gem, it will be added to your path.
+## Installation
 
-## Purpose
+Add this line to your application's Gemfile:
 
-When integrating RuboCop into large existing project, it is likely that it will have an overwhelming number of offenses.
-To aid adoption, RuboCop can generate a `.rubocop_todo.yml` file to exclude existing violations.
+```ruby
+gem 'nucop-cops'
+```
 
-This presents two problems:
+And then execute:
 
-* It is harder for developers to fix existing problems, since TODO violations are ignored
-* Cops with too many violations are disabled, so new violations can be introduced into the codebase
+    $ bundle install
 
-Editors can help with the former. However, `nucop` provides a couple tools to help speed adoption:
+Or install it yourself as:
 
-1. Enforced cops
+    $ gem install nucop-cops
 
-This is a new list of cops and/or departments that MUST not have violations.
+## Usage
 
-This is useful in CI if you do not want developers to add new `Layout/` violations, etc.
+Add the following to your `.rubocop.yml` file:
 
-Also, if `nucop regen_backlog` is used to regenerate the TODO file, any cops that had TODO violations,
-but no longer have violations are automatically added to enforced cops list.
+```yaml
+require: nucop-cops
+```
 
-2. `nucop modified_lines`
+## Custom Cops
 
-This command will print ALL RuboCop violations (i.e. including TODO violations) for all code lines changes since some git SHA.
+This gem includes the following custom cops:
 
-This can be useful for local development, to increases visibility of existing violations during development cycles, but does
-not hold up code in CI.
+### Nucop/ExplicitFactoryBotUsage
 
-Finally, several custom cops are included, which may be application/framework/gem specific.
+Looks for usages of `FactoryGirl.create`, etc. and suggests using the factory method directly.
 
-## CLI Commands
+**Example:**
 
-The [nucop CLI](lib/nucop/cli.rb) provides the following commands:
+```ruby
+# bad
+job = FactoryGirl.create(:job, project: project)
+FactoryGirl.build(:project, code: "Super Project")
 
-| Command              | Description                                                                                              |
-|----------------------|----------------------------------------------------------------------------------------------------------|
-| diff_enforced        | run RuboCop on the current diff using only the enforced cops                                             |
-| diff_enforced_github | run RuboCop on the current diff using only the enforced cops (uses GitHub to determine the current diff) |
-| diff                 | run RuboCop on the current diff                                                                          |
-| diff_github          | run RuboCop on the current diff (uses GitHub to determine the current diff)                              |                                                                          |
-| rubocop              | run RuboCop on files provided (without backlog by default)                                               |
-| regen_backlog        | update the RuboCop backlog, updating enforced cops list                                                  |
-| update_enforced      | update the enforced cops list with file with cops that no longer have violations                         |
-| modified_lines       | display RuboCop violations for ONLY modified lines                                                       |
-| ready_for_promotion  | display the next n cops with the fewest violations                                                       |
+# good
+job = create(:job, project: project)
+build(:project, code: "Super Project")
+```
 
-## Requirements
+### Nucop/NoCoreMethodOverrides
 
-Beyond a working Ruby installation and what is specified in the gemspec, we make some assumptions about your environment:
+Prevents overriding core Ruby methods.
 
-* [git](https://git-scm.com/) for SCM
-* `grep`
+### Nucop/NoWipSpecs
 
-## Configuration
+Prevents WIP specs from being committed.
 
-`nucop` can be configured by the YAML file `.nucop.yml`.
+### Nucop/OrderedHash
 
-See the example config file `.nucop.yml.example`
+Ensures hashes are ordered consistently.
 
-| Option                   | Description                                                                                                                         | Default               |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| rubocop_todo_file        | A generated file, containing the RuboCop TODO violations (i.e. RuboCop backlog)                                                     | .rubocop_todo.yml     |
-| diffignore_file          | A file of paths or files that removed. Must be passable to `grep -f`.                                                               | .nucop_diffignore     |
+### Nucop/ReleaseTogglesUseSymbols
 
-## TODO
+Ensures release toggles use symbols.
 
-* Update README
-  * Describe features
-  * Document commands
-* Undocumented option `junit_report` in `rubocop` command
-* Introduce `RubocopCommandBuilder`
-* Add tests!
+### Nucop/ShadowingFactoryBotCreationMethods
+
+Prevents shadowing FactoryBot creation methods.
+
+## Development
+
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`.
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/nulogy/nucop-cops.
 
 ## License
 

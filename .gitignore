@@ -7,6 +7,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+.cursor
 .rspec_status
 .tool-versions
 Gemfile.lock
