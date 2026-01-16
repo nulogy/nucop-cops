@@ -5,6 +5,10 @@
 * Initial release of nucop-cops gem, extracted from nucop
 * Contains only custom RuboCop cops, no longer includes CLI tooling
 
+----
+
+# Old change log from nucop gem
+
 ## 1.0.0 (2025-07-04)
 
 * Drop support for .rubocop.enforced.yml
