@@ -9,6 +9,12 @@
 
 # Old change log from nucop gem
 
+## 1.0.1 (2025-07-21)
+
+### Fixed
+
+* Clear .rubocop_todo.yml before regenerating it
+
 ## 1.0.0 (2025-07-04)
 
 * Drop support for .rubocop.enforced.yml
