@@ -5,7 +5,7 @@ require "rubocop/rake_task"
 RSpec::Core::RakeTask.new(:spec)
 
 RuboCop::RakeTask.new do |task|
-  task.requires << "rubocop-rspec"
+  task.options = ["--plugin", "rubocop-rspec"]
 end
 
 task default: [:spec, :rubocop]

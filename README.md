@@ -51,7 +51,7 @@ Detects method definitions in spec files that would shadow FactoryBot methods li
 
 ## Development
 
-After checking out the repo, run `bundle install` to install dependencies. Then, run `bundle exec rspec` to run the tests.
+After checking out the repo, run `bundle install` to install dependencies. Then, run `bundle exec rake` to run the tests and RuboCop.
 
 ## Publishing
 
