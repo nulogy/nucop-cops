@@ -3,7 +3,7 @@ AllCops:
   SuggestExtensions: false
 
 Gemspec/DevelopmentDependencies:
-  EnforcedStyle: gemspec
+  EnforcedStyle: Gemfile
 
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
