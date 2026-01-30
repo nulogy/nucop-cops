@@ -53,6 +53,22 @@ Detects method definitions in spec files that would shadow FactoryBot methods li
 
 After checking out the repo, run `bundle install` to install dependencies. Then, run `bundle exec rspec` to run the tests.
 
+## Publishing
+
+To publish a new version:
+
+1. Update the version number in `lib/nucop/version.rb`
+2. Update `CHANGELOG.md` with the changes
+3. Commit the changes:
+   ```bash
+   git add -A
+   git commit -m "Bump version to X.X.X"
+   ```
+4. Release the gem (creates git tag, builds, and pushes to RubyGems):
+   ```bash
+   bundle exec rake release
+   ```
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
