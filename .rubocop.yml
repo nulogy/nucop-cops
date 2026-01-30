@@ -20,6 +20,9 @@ Metrics:
 Naming/MemoizedInstanceVariableName:
   EnforcedStyleForLeadingUnderscores: required
 
+RSpec/ExampleLength:
+  Enabled: false
+
 Style/Documentation:
   Enabled: false
 
