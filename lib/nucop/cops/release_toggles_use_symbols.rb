@@ -30,9 +30,9 @@ module Nucop
     PATTERN
 
     def on_send(node)
-      test_helper?(node) { add_offense(node, message: MSG, location: node.children[2].loc.expression) }
+      test_helper?(node) { add_offense(node.children[2], message: MSG) }
       release_toggles_public_api_method?(node) do
-        add_offense(node, message: MSG, location: node.children[2].loc.expression) do |corrector|
+        add_offense(node.children[2], message: MSG) do |corrector|
           toggle_name = node.children[2].value
 
           corrector.replace(node.children[2].source_range, ":#{toggle_name}")
