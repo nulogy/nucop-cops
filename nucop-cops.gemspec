@@ -6,7 +6,7 @@ require "nucop/version"
 Gem::Specification.new do |spec|
   spec.name = "nucop-cops"
   spec.version = Nucop::VERSION
-  spec.authors = ["Jason Schweier"]
+  spec.authors = ["Jason Cheong-Kee-You", "Jason Schweier"]
   spec.email = ["jasons@nulogy.com"]
   spec.summary = "Custom RuboCop cops for Nulogy's Ruby projects."
   spec.licenses = ["MIT"]
